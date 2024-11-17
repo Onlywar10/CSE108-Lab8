@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard</title>
+    <style>
+        /* Add basic styles for table and layout */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        a {
+            text-decoration: none;
+            color: blue;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            margin: 20px;
+        }
+
+        .logout {
+            margin-top: 20px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome, {{ session.get('username') }}!</h1>
+        <h2>Your Courses</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Course Name</th>
+                    <th>Teacher</th>
+                    <th>Time</th>
+                    <th>Students Enrolled</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for class_ in classes %}
+                <tr>
+                    <td><a href="{{ url_for('view_class', class_id=class_['id']) }}">{{ class_['name'] }}</a></td>
+                    <td>{{ class_['teacher'] }}</td>
+                    <td>{{ class_['time'] }}</td>
+                    <td>{{ class_['enrolled'] }}/{{ class_['capacity'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a class="logout" href="{{ url_for('logout') }}">Sign out</a>
+    </div>
+</body>
+</html>
