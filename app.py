@@ -7,9 +7,11 @@ app.config.from_object(Config)
 
 db.init_app(app)
 
+
 @app.route('/')
 def home():
     return render_template('base.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -33,12 +35,15 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html')
+
+
 @app.route('/logout')
 def logout():
     # Clear all session data to log the user out
     session.clear()
     flash("You have been logged out.", "info")
     return redirect(url_for('login'))
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -69,6 +74,7 @@ def login():
 
     return render_template('login.html')
 
+
 @app.route('/dashboard/<role>')
 def dashboard(role):
     print(f"Dashboard route accessed with role: {role}")  # Debug print
@@ -95,13 +101,16 @@ def dashboard(role):
         # Add enrollment information for each class
         class_info = []
         for class_ in classes:
-            enrolled_students = Enrollment.query.filter_by(class_id=class_.id).count()
-            print(f"Class ID: {class_.id}, Enrolled: {enrolled_students}")  # Debug print
+            enrolled_students = Enrollment.query.filter_by(
+                class_id=class_.id).count()
+            # Debug print
+            print(f"Class ID: {class_.id}, Enrolled: {enrolled_students}")
 
             class_info.append({
                 'id': class_.id,
                 'name': class_.name,
-                'teacher': User.query.get(teacher_id).username,  # Get teacher's name
+                # Get teacher's name
+                'teacher': User.query.get(teacher_id).username,
                 'time': class_.time,
                 'capacity': class_.capacity,
                 'enrolled': enrolled_students
@@ -112,9 +121,57 @@ def dashboard(role):
         # Render the teacher dashboard template
         return render_template('teacherDashboard.html', classes=class_info)
     # Handle other roles here (e.g., student, admin)
+
+    # Check if the role is "student"
+    if role == "student":
+        print("Student Dashboard requested.")
+
+        # Fetch the students's ID from the session
+        student_name = session.get('username')  # Corrected key
+        print(f"Student Name from session: {student_name}")  # Debug print
+        student_id = session.get('id')  # Corrected key
+        print(f"Student ID from session: {student_id}")  # Debug print
+
+        # Fetch data on all available classes
+        result = Class.query.all()
+        classes = []
+        for class_ in result:
+            # Getting the teacher's name for the course
+            teacherName = User.query.filter_by(id=class_.teacher_id).first()
+            print(teacherName.username)
+
+            # Check to see if student is already enrolled in the course
+            enrollmentCheck = Enrollment.query.filter_by(
+                student_id=student_id).first()
+
+            enrolled = "+"
+            if (enrollmentCheck):
+                print(enrollmentCheck.class_id)
+                enrolled = "-"
+            else:
+                print("Student is not enrolled in", class_.name)
+
+            classData = {"id": class_.id, "name": class_.name,
+                         "teacher_id": teacherName.username, "time": class_.time, "capacity": class_.capacity, "enrolled": enrolled}
+
+            classes.append(classData)
+
+        print(classes)
+
+        return render_template('studentDashboard.html', classes=classes, enrolled="1")
     else:
         return render_template('dashboard.html', role=role)
-@app.route('/class/<int:class_id>', methods=['GET'])
+
+
+@ app.route("/enroll", methods=["POST"])
+def enroll():
+    data = request.get_json()
+    print(data["id"])
+
+    return "Enrolled successfully!"
+
+
+@ app.route('/class/<int:class_id>', methods=['GET'])
 def view_class(class_id):
     # Fetch class and associated details for the GET request
     class_ = Class.query.get_or_404(class_id)
@@ -136,7 +193,8 @@ def view_class(class_id):
     # Render the class detail template
     return render_template('class_detail.html', class_=class_, teacher=teacher, students=students)
 
-@app.route('/class/<int:class_id>/update_grade', methods=['POST'])
+
+@ app.route('/class/<int:class_id>/update_grade', methods=['POST'])
 def update_grade(class_id):
     # Parse JSON data from the request
     data = request.get_json()
@@ -144,7 +202,8 @@ def update_grade(class_id):
     new_grade = data.get('new_grade')
 
     # Find the enrollment record and update the grade
-    enrollment = Enrollment.query.filter_by(class_id=class_id, student_id=student_id).first()
+    enrollment = Enrollment.query.filter_by(
+        class_id=class_id, student_id=student_id).first()
     if enrollment:
         enrollment.grade = new_grade
         db.session.commit()
@@ -152,10 +211,8 @@ def update_grade(class_id):
     else:
         return {'message': 'Enrollment not found'}, 404
 
-
     # Render the class detail template
     return render_template('class_detail.html', class_=class_, teacher=teacher, students=students)
-
 
 
 if __name__ == '__main__':

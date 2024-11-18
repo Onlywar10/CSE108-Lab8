@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | {{session.get("username")}}</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      td,
+      th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+      .header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .headeritem {
+        width: 20%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .headercenter {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 45px;
+      }
+      .classesDisplayConatainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 50px;
+        border: 1px solid black;
+      }
+      .classTabsContainer {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+      }
+      .classTab {
+        border: 1px solid black;
+        text-align: center;
+        font-size: 26px;
+        background: #00b4d8;
+        width: 50%;
+      }
+      .classTabActive {
+        border: 1px solid black;
+        text-align: center;
+        font-size: 26px;
+        background: #90e0ef;
+        width: 50%;
+      }
+      .classTab:hover {
+        cursor: pointer;
+        background: #90e0ef;
+      }
+      .classList {
+        display: none;
+        padding: 40px;
+      }
+      .classListInitial {
+        display: flex;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h2 class="headeritem">Welcome {{session.get("username")}}!</h2>
+      <h1 class="headercenter">ACME University</h1>
+      <a
+        class="headeritem"
+        style="font-size: 20px"
+        href="{{ url_for('logout') }}"
+        >Sign out</a
+      >
+    </div>
+    <div class="classesDisplayConatainer">
+      <div class="classTabsContainer">
+        <div
+          class="classTabActive"
+          id="yourClasses"
+          onclick="selectTab(event, 'currentlyEnrolled')"
+        >
+          Your Courses
+        </div>
+        <div
+          class="classTab"
+          id="addClasses"
+          onclick="selectTab(event, 'fullCatalog')"
+        >
+          Add Courses
+        </div>
+      </div>
+      <div id="currentlyEnrolled" class="classListInitial">
+        {% if enrolled == "1" %}
+        <div>Test</div>
+        {% endif %}
+      </div>
+      <div id="fullCatalog" class="classList">
+        <table>
+          <tr>
+            <th>Course Name</th>
+            <th>Teacher</th>
+            <th>Time</th>
+            <th>Students Enrolled</th>
+            <th>Add Class</th>
+          </tr>
+          {% for class_ in classes %}
+          <tr>
+            <td>{{class_["name"]}}</td>
+            <td>{{class_["teacher_id"]}}</td>
+            <td>{{class_["time"]}}</td>
+            <td>{{class_["capacity"]}}</td>
+            <td>
+              <button value="{{ class_  }}" onclick="classEnroll(this)">
+                {{class_["enrolled"]}}
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+
+    <script src="../static/js/studentDashboard.js"></script>
+    <script src="../static/js/addCourse.js"></script>
+  </body>
+</html>
