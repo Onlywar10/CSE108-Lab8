@@ -23,4 +23,6 @@ const classEnroll = (buttonElement) => {
     .catch((error) => {
       console.log(error);
     });
+
+  window.location.reload();
 };

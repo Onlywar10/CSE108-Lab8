@@ -69,6 +69,13 @@
       }
       .classListInitial {
         display: flex;
+        padding: 40px;
+      }
+      .enrollmentButton {
+        width: 50%;
+      }
+      .enrollmentButton:hover {
+        cursor: pointer;
       }
     </style>
   </head>
@@ -101,8 +108,25 @@
         </div>
       </div>
       <div id="currentlyEnrolled" class="classListInitial">
-        {% if enrolled == "1" %}
-        <div>Test</div>
+        {% if enrolledList | length != 0 %}
+        <table>
+          <tr>
+            <th>Course Name</th>
+            <th>Teacher</th>
+            <th>Time</th>
+            <th>Students Enrolled</th>
+          </tr>
+          {% for class_ in enrolledList %}
+          <tr>
+            <td>{{class_["name"]}}</td>
+            <td>{{class_["teacher_id"]}}</td>
+            <td>{{class_["time"]}}</td>
+            <td>{{class_["capacity"]}}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% endif %} {% if enrolledList | length == 0 %}
+        <div>No Classes to Display</div>
         {% endif %}
       </div>
       <div id="fullCatalog" class="classList">
@@ -121,7 +145,11 @@
             <td>{{class_["time"]}}</td>
             <td>{{class_["capacity"]}}</td>
             <td>
-              <button value="{{ class_  }}" onclick="classEnroll(this)">
+              <button
+                value="{{ class_  }}"
+                onclick="classEnroll(this)"
+                class="enrollmentButton"
+              >
                 {{class_["enrolled"]}}
               </button>
             </td>

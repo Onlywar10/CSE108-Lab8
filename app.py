@@ -134,31 +134,62 @@ def dashboard(role):
 
         # Fetch data on all available classes
         result = Class.query.all()
+
+        # All classes list
         classes = []
         for class_ in result:
             # Getting the teacher's name for the course
             teacherName = User.query.filter_by(id=class_.teacher_id).first()
-            print(teacherName.username)
 
             # Check to see if student is already enrolled in the course
             enrollmentCheck = Enrollment.query.filter_by(
-                student_id=student_id).first()
+                student_id=student_id)
 
             enrolled = "+"
-            if (enrollmentCheck):
-                print(enrollmentCheck.class_id)
-                enrolled = "-"
-            else:
-                print("Student is not enrolled in", class_.name)
+            for enrollment in enrollmentCheck:
+                if (class_.id == enrollment.class_id):
+                    print("Student is enrolled in", class_.name)
+                    enrolled = "-"
+                else:
+                    print("Student is not enrolled in", class_.name)
 
+            # Updating the capacity
+            # First get the count of students already enrolled in the class
+            studentsEnrolled = Enrollment.query.filter_by(
+                class_id=class_.id).count()
+            availableCapacity = str(studentsEnrolled) + \
+                "/" + str(class_.capacity)
+
+            # Class data dictionary to send to front end
             classData = {"id": class_.id, "name": class_.name,
-                         "teacher_id": teacherName.username, "time": class_.time, "capacity": class_.capacity, "enrolled": enrolled}
+                         "teacher_id": teacherName.username, "time": class_.time, "capacity": availableCapacity, "enrolled": enrolled}
 
             classes.append(classData)
 
-        print(classes)
+        # Fetching all classes that current student is enrolled in
+        enrollmentCheck = Enrollment.query.filter_by(
+            student_id=student_id)
+        enrolledList = []
 
-        return render_template('studentDashboard.html', classes=classes, enrolled="1")
+        for class_ in enrollmentCheck:
+            # Get the class data from the class id
+            classData = Class.query.filter_by(id=class_.class_id).first()
+
+            # Getting the teacher's name for the course
+            teacherName = User.query.filter_by(id=classData.teacher_id).first()
+
+            # Updating the capacity
+            # First get the count of students already enrolled in the class
+            studentsEnrolled = Enrollment.query.filter_by(
+                class_id=classData.id).count()
+            availableCapacity = str(studentsEnrolled) + \
+                "/" + str(classData.capacity)
+
+            enrollmentData = {"id": classData.id, "name": classData.name,
+                              "teacher_id": teacherName.username, "time": classData.time, "capacity": availableCapacity}
+            enrolledList.append(enrollmentData)
+
+        return render_template('studentDashboard.html', classes=classes, enrolledList=enrolledList)
     else:
         return render_template('dashboard.html', role=role)
 
@@ -166,9 +197,23 @@ def dashboard(role):
 @ app.route("/enroll", methods=["POST"])
 def enroll():
     data = request.get_json()
-    print(data["id"])
+    print(data["enrolled"])
 
-    return "Enrolled successfully!"
+    if (data["enrolled"] == "+"):
+        newEnrollment = Enrollment(
+            student_id=session.get('id'), class_id=data["id"], grade=0)
+        db.session.add(newEnrollment)
+        db.session.commit()
+        print("Added class")
+        return "Enrolled successfully!"
+    else:
+        enrollment = Enrollment.query.filter_by(
+            student_id=session.get("id"), class_id=data["id"]).first()
+
+        db.session.delete(enrollment)
+        db.session.commit()
+        print("Remove class button pressed")
+        return "Removed classes successfully!"
 
 
 @ app.route('/class/<int:class_id>', methods=['GET'])
