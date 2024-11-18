@@ -13,7 +13,6 @@ db.init_app(app)
 bcrypt = Bcrypt(app)
 
 # --- Flask-Admin Setup ---
-# Custom ModelView for admin access control
 class AdminModelView(ModelView):
     def is_accessible(self):
         # Only allow access to admin users
@@ -45,14 +44,13 @@ class EnrollmentAdminView(AdminModelView):
         'student_name': _student_name_formatter,
         'class_name': _class_name_formatter
     }
-
-# Initialize Flask-Admin
 admin = Admin(app, name='Admin Panel', template_mode='bootstrap4')
 admin.add_view(AdminModelView(User, db.session))
 admin.add_view(AdminModelView(Class, db.session))
 admin.add_view(EnrollmentAdminView(Enrollment, db.session))
 
-# --- Flask Routes (Keep Your Existing Routes) ---
+
+# --- Flask Routes ---
 @app.route('/')
 def home():
     return render_template('base.html')
