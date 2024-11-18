@@ -8,38 +8,41 @@
     <script src="{{ url_for('static', filename='js/updateGrade.js') }}" defer></script>
 </head>
 <body>
-    <h1>Class: {{ class_.name }}</h1>
-    <p><strong>Teacher:</strong> {{ teacher.username }}</p>
-    <p><strong>Time:</strong> {{ class_.time }}</p>
-    <p><strong>Capacity:</strong> {{ class_.capacity }}</p>
-    <p><strong>Enrolled:</strong> {{ students|length }}</p>
+    <div class="container">
+        <div class="class-details">
+            <h1>Class: {{ class_.name }}</h1>
+            <p><strong>Teacher:</strong> {{ teacher.username }}</p>
+            <p><strong>Time:</strong> {{ class_.time }}</p>
+            <p><strong>Capacity:</strong> {{ class_.capacity }}</p>
+            <p><strong>Enrolled:</strong> {{ students|length }}</p>
+        </div>
 
-    <h2>Enrolled Students</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Student Name</th>
-                <th>Grade</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for student in students %}
-            <tr>
-                <td>{{ student.name }}</td>
-                <td>
-                <input 
-                    type="number" 
-                    class="grade-input" 
-                    value="{{ student['grade'] if student['grade'] is not none else '' }}"
-                    onchange="updateGrade({{ student['id'] }}, {{ class_.id }}, this);"
+        <h2>Enrolled Students</h2>
+        <table class="students-table">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.name }}</td>
+                    <td>
+                        <input 
+                            type="number" 
+                            class="grade-input" 
+                            value="{{ student['grade'] if student['grade'] is not none else '' }}"
+                            onchange="updateGrade({{ student['id'] }}, {{ class_.id }}, this);"
+                        />
+                    </td>                
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-                />
-                </td>                
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ url_for('dashboard', role='teacher') }}">Back to Dashboard</a>
+        <a href="{{ url_for('dashboard', role='teacher') }}" class="back-link">Back to Dashboard</a>
+    </div>
 </body>
 </html>
