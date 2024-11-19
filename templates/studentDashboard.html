@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard | {{session.get("username")}}</title>
     <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+      }
       table {
         border-collapse: collapse;
         width: 100%;
@@ -147,7 +150,7 @@
             <td>{{class_["capacity"]}}</td>
             <td>
               <button
-                value="{{ class_ | tojson }}"
+                value="{{ class_ }}"
                 onclick="classEnroll(this)"
                 class="enrollmentButton"
               >

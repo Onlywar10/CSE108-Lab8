@@ -12,6 +12,8 @@ app.config.from_object(Config)
 db.init_app(app)
 
 # --- Flask-Admin Setup ---
+
+
 class AdminModelView(ModelView):
     def is_accessible(self):
         # Only allow access to admin users
@@ -20,6 +22,8 @@ class AdminModelView(ModelView):
     def inaccessible_callback(self, name, **kwargs):
         flash("You do not have permission to access the admin page.", "danger")
         return redirect(url_for('login'))
+
+
 class ClassAdminView(ModelView):
     def delete_model(self, model):
         # Delete related enrollments first
@@ -27,6 +31,7 @@ class ClassAdminView(ModelView):
         db.session.commit()
         # Then delete the class
         super().delete_model(model)
+
 
 class UserAdminView(ModelView):
     column_list = ['id', 'username', 'role', 'password']
@@ -45,7 +50,6 @@ class UserAdminView(ModelView):
 
         super().on_model_delete(model)
 
-from wtforms.fields import SelectField
 
 class EnrollmentAdminView(ModelView):
     # Specify the columns to display in the list view
@@ -87,11 +91,11 @@ class EnrollmentAdminView(ModelView):
         'class_id': _class_name_formatter
     }
 
+
 admin = Admin(app, name='Admin Panel', template_mode='bootstrap4')
 admin.add_view(UserAdminView(User, db.session))
 admin.add_view(ClassAdminView(Class, db.session))
 admin.add_view(EnrollmentAdminView(Enrollment, db.session))
-
 
 
 # --- Flask Routes ---
@@ -136,7 +140,8 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        user = User.query.filter_by(username=username, password=password).first()
+        user = User.query.filter_by(
+            username=username, password=password).first()
 
         if user:
             session['id'] = user.id
@@ -198,7 +203,8 @@ def dashboard(role):
             for class_ in result
         ]
 
-        enrolled_classes = Enrollment.query.filter_by(student_id=student_id).all()
+        enrolled_classes = Enrollment.query.filter_by(
+            student_id=student_id).all()
         enrolled_list = [
             {
                 'id': class_.class_id,
@@ -239,7 +245,8 @@ def update_grade(class_id):
     student_id = data.get('student_id')
     new_grade = data.get('new_grade')
 
-    enrollment = Enrollment.query.filter_by(class_id=class_id, student_id=student_id).first()
+    enrollment = Enrollment.query.filter_by(
+        class_id=class_id, student_id=student_id).first()
     if enrollment:
         enrollment.grade = new_grade
         db.session.commit()
@@ -253,12 +260,19 @@ def enroll():
     data = request.get_json()
 
     if data["enrolled"] == "+":
-        new_enrollment = Enrollment(student_id=session.get('id'), class_id=data["id"], grade=0)
-        db.session.add(new_enrollment)
-        db.session.commit()
+        # Check if the class is already full
+        currentCount = Enrollment.query.filter_by(class_id=data["id"]).count()
+        cap = Class.query.filter_by(id=data["id"]).first()
+        if (currentCount != cap.capacity):
+            new_enrollment = Enrollment(student_id=session.get(
+                'id'), class_id=data["id"], grade=0)
+            db.session.add(new_enrollment)
+            db.session.commit()
+
         return "Enrolled successfully!"
     else:
-        enrollment = Enrollment.query.filter_by(student_id=session.get("id"), class_id=data["id"]).first()
+        enrollment = Enrollment.query.filter_by(
+            student_id=session.get("id"), class_id=data["id"]).first()
         db.session.delete(enrollment)
         db.session.commit()
         return "Removed classes successfully!"

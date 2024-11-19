@@ -30,38 +30,65 @@ const selectTab = (e, tabID) => {
 };
 
 // Define the classEnroll function
-function classEnroll(buttonElement) {
-  // Parse the button's value (ensure it matches the expected format)
-  const classData = JSON.parse(buttonElement.value);
-  const classId = classData.id;
-  const enrolledStatus = classData.enrolled;
+// function classEnroll(buttonElement) {
+//   // Parse the button's value (ensure it matches the expected format)
+//   const classData = JSON.parse(buttonElement.value);
+//   const classId = classData.id;
+//   const enrolledStatus = classData.enrolled;
 
-  // Determine the new status based on the current status
-  const newStatus = enrolledStatus === "+" ? "+" : "-";
+//   // Determine the new status based on the current status
+//   const newStatus = enrolledStatus === "+" ? "+" : "-";
 
-  // Send the enrollment request to the server
+//   // Send the enrollment request to the server
+//   fetch("/enroll", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       id: classId,
+//       enrolled: newStatus,
+//     }),
+//   })
+//     .then((response) => {
+//       if (!response.ok) {
+//         throw new Error("Failed to update enrollment");
+//       }
+//       return response.text();
+//     })
+//     .then((message) => {
+//       alert(message); // Notify the user
+//       location.reload(); // Reload the page to reflect changes
+//     })
+//     .catch((error) => {
+//       console.error("Error enrolling class:", error);
+//       alert("Error enrolling class: " + error.message);
+//     });
+// }
+
+const classEnroll = (buttonElement) => {
+  var classData = buttonElement.value;
+  classData = classData.replaceAll("'", '"');
+
+  classData = JSON.parse(classData);
+
+  console.log(classData);
+
   fetch("/enroll", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      id: classId,
-      enrolled: newStatus,
-    }),
+    body: JSON.stringify(classData),
   })
     .then((response) => {
       if (!response.ok) {
-        throw new Error("Failed to update enrollment");
+        throw new Error("Failed to enroll in class");
       }
-      return response.text();
-    })
-    .then((message) => {
-      alert(message); // Notify the user
-      location.reload(); // Reload the page to reflect changes
     })
     .catch((error) => {
-      console.error("Error enrolling class:", error);
-      alert("Error enrolling class: " + error.message);
+      console.log(error);
     });
-}
+
+  window.location.reload();
+};
